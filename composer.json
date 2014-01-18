@@ -1,7 +1,7 @@
 {
     "name": "dosomething/message-broker",
     "type": "library",
-    "description": "A message broker system to cordinate sending to messsages the DoSomething.org members.",
+    "description": "A message broker system to cordinate sending messsages to DoSomething.org members.",
     "keywords": ["message broker"],
     "homepage": "https://github.com/DoSomething/message-broker",
     "license" : "MIT",
