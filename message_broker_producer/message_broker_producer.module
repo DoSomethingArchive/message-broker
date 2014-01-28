@@ -1,0 +1,108 @@
+<?php
+
+/**
+ * @file
+ * This module exposes the Message Broker object library to Drupal.
+ */
+
+/**
+ * Implements hook_libraries_info().
+ */
+function message_broker_producer_libraries_info() {
+
+$bla = TRUE;
+if ($bla) {
+  $bla = TRUE;
+}
+  
+  $libraries['messagebroker-phplib'] = array(
+    'name' => 'Message Broker PHP Library',
+    'vendor url' => 'http://www.dosomething.org/message-broker-phplib',
+    'download url' => 'https://github.com/DoSomething/message-broker-phplib',
+    'path' => 'lib',
+    'version' => '1.0',
+    'files' => array(
+      'php' => array('MessageBroker.php'),
+    ),
+  );
+
+  return $libraries;
+}
+
+/**
+ * Implements hook_menu().
+ */
+function message_broker_producer_menu() {
+   $items['admin/config/services/message-broker-producer'] = array(
+    'title' => 'Message Broker settings',
+    'description' => 'Manage Message Broker settings.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('message_broker_producer_config_form'),
+    'access arguments' => array('administer messagebroker'),
+    'file' => 'message_broker_producer.admin.inc',
+  );
+   $items['admin/config/services/message-broker-producer-test'] = array(
+    'title' => 'Message Broker TEST',
+    'description' => 'Message Broker Producer TEST',
+    'page callback' => 'message_broker_producer_test',
+    'access arguments' => array('administer message_broker_producer'),
+  );
+   
+
+  return $items;
+}
+
+/**
+ * Implements hook_permission().
+ */
+function message_broker_producer_permission() {
+  return array(
+    'administer message_broker_producer' =>  array(
+      'title' => t('Administer Message Broker Producer'),
+      'description' => t('Manage Message Broker Producer settings.'),
+    )
+  );
+}
+
+/**
+ * Makes an authenticated api request to Mobile Commons.
+ *
+ * @param $method
+ *   The api method to request.
+ *   @see For list of available methods - https://github.com/DoSomething/mobilecommons-php/blob/master/lib/MobileCommons/MobileCommons.php
+ * @param $params
+ *   An option associative array of parameters.
+ *
+ * @return
+ *   A SimpleXML response object.
+ */
+function message_broker_producer_request($method, $params = array()) {
+  $library = libraries_load('messagebroker-phplib');
+  if (empty($library['loaded'])) return FALSE;
+
+  $MessageBroker = new MessageBroker();
+
+  return $MessageBroker->$method($params);
+}
+
+/**
+ * Loads StatHat library.
+ *
+ * @return
+ *   TRUE if library is successfully loaded, FALSE if not.
+ */
+function message_broker_producer_test() {
+
+  $user_signup = array(
+    'activity' => 'signup',
+    'activity_type' => 'campaign',
+    'activity_email' => 'dlee+messagebroker-test@dosomething.org',
+    'activity_id' => 8012345,
+    'activity_timestamp' => time(),
+  );
+  $payload = json_encode($user_signup);
+
+  message_broker_producer_request('produce', array('queueName' => 'transactionals', 'payload' => $payload));
+}
+
+
