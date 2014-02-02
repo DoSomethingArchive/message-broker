@@ -8,10 +8,8 @@ if ($bla) {
   $bla = FALSE;
 }
 
-putenv("MANDRILL_APIKEY=451c01b4-7b72-4d1d-ae0a-1d50d7d638d1");
+include('config.inc');
 $mandrill = new Mandrill();
-
-print_r($mandrill);
 
 $connection = new AMQPConnection('localhost', 5672, 'guest', 'guest');
 
