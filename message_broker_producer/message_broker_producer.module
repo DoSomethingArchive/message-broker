@@ -104,14 +104,15 @@ function message_broker_producer_request($method) {
  */
 function message_broker_producer_test() {
 
-  $user_signup = array(
+  $production_details = array(
     'activity' => 'signup',
-    'activity_type' => 'campaign',
-    'activity_email' => 'dlee+messagebroker-test@dosomething.org',
-    'activity_id' => 8012345,
+    'event_type' => 'campaign',
+    'event_id' => 8012345,
+    'email' => 'dlee+messagebroker-test@dosomething.org',
     'activity_timestamp' => time(),
+    'application_id' => 1
   );
-  $payload = json_encode($user_signup);
+  $payload = json_encode($production_details);
 
   message_broker_producer_request('produce', array('queueName' => 'transactionals', 'payload' => $payload));
 }
