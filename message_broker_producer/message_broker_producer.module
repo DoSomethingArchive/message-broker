@@ -76,13 +76,13 @@ function message_broker_producer_permission() {
  * @return
  *   A SimpleXML response object.
  */
-function message_broker_producer_request($method, $params = array()) {
+function message_broker_producer_request($method) {
   $library = libraries_load('messagebroker-phplib');
   if (empty($library['loaded'])) return FALSE;
 
   $MessageBroker = new MessageBroker();
 
-  return $MessageBroker->$method($params);
+  return $MessageBroker->$method();
 }
 
 /**
