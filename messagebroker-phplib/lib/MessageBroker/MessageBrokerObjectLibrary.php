@@ -4,12 +4,15 @@
  * Message Broker class library
  */
 
+include(__DIR__ . 'config.inc');
+
 use PhpAmqpLib\Connection\AMQPConnection;
 use PhpAmqpLib\Message\AMQPMessage;
 
 class MessageBroker
 {
   public $connection = NULL;
+  public $credentials;
 
   /**
     * Constructor
@@ -17,7 +20,7 @@ class MessageBroker
     * @param array $config Configuration variables
     * @return object
     */
-    public function __construct($credentials = array()) {
+    public function __construct() {
 
       // Cannot continue if the library wasn't loaded.
       if (!class_exists('AMQPConnection')) {
@@ -26,20 +29,7 @@ class MessageBroker
           rabbitmq INSTALL file for more details.");
       }
 
-      if (empty($credentials['host']) || empty($credentials['port']) ||
-          empty($credentials['username']) || empty($credentials['password'])) {
-
-        // @todo: These values should be pulled out of a config file. Using variable_get() is a Drupal thingy.
-        $credentials = array(
-          'host' => variable_get('message_broker_producer_host', 'localhost'),
-          'port' => variable_get('message_broker_producer_port', '5672'),
-          'username' => variable_get('message_broker_producer_username', 'guest'),
-          'password' => variable_get('message_broker_producer_password', 'guest'),
-        );
-
-      }
       $this->connection = new AMQPConnection($credentials['host'], $credentials['port'], $credentials['username'], $credentials['password']);
-
     }
 
   /**
