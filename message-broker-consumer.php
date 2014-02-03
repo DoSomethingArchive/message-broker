@@ -35,8 +35,24 @@ echo ' [*] Waiting for messages. To exit press CTRL+C', "\n";
 // will buffer the messages until we're ready to use them. That is what
 // QueueingConsumer does.
 $callback = function($payload){
-  echo " [x] Received ", $payload->body, "\n";
-  // Mandrill stub
+  
+  echo " [x] Received payload: ", $payload->body, "\n";
+  
+  // Assemble message details
+  $payloadDetails = unseralize($payload->body);
+  $targetEmail = $payloadDetails[''];
+  list($templateName, $templateContent, $message) = BuildMessage($targetEmail);
+  
+  echo " [x] Built message contents...\n";
+
+  // Send message
+  $mandrillResults = $mandrill->messages->sendTemplate($templateName, $templateContent, $message);
+  
+  $mandrillResults = print_r($mandrillResults, TRUE);
+
+  echo " [x] Sent message via Mandrill:\n";
+  echo $mandrillResults;
+
   echo " [x] Done", "\n";
   $payload->delivery_info['channel']->basic_ack($payload->delivery_info['delivery_tag']);
 };
@@ -67,4 +83,35 @@ while(count($channel->callbacks)) {
 $channel->close();
 $connection->close();
 
-?>
+/*
+ * Assembly of message based on Mandrill API: Send-Template
+ * https://mandrillapp.com/api/docs/messages.JSON.html#method=send-template
+ */
+function BuildMessage($targetEmail) {
+  
+  $message = array(
+    'subject' => 'Test message',
+    'from_email' => $targetEmail,
+    'html' => '<p>this is a test message with Mandrill\'s PHP wrapper!.</p>',
+    'to' => array(array('email' => $targetEmail, 'name' => 'Recipient 1')),
+    'merge_vars' => array(array(
+        'rcpt' => $targetEmail,
+        'vars' =>
+        array(
+            array(
+                'name' => 'FIRSTNAME',
+                'content' => 'Recipient 1 first name'),
+            array(
+                'name' => 'LASTNAME',
+                'content' => 'Last name')
+    ))));
+
+  $templateName = 'Stationary';
+
+  $templateContent = array(
+    array(
+        'name' => 'main',
+        'content' => 'Hi *|FIRSTNAME|* *|LASTNAME|*, thanks for signing up.'),
+  );
+
+  return array($templateName, $templateContent, $message);
