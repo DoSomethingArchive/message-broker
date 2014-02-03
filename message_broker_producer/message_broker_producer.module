@@ -38,7 +38,7 @@ function message_broker_producer_menu() {
     'description' => 'Manage Message Broker settings.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('message_broker_producer_config_form'),
-    'access arguments' => array('administer messagebroker'),
+    'access arguments' => array('administer message_broker_producer'),
     'file' => 'message_broker_producer.admin.inc',
   );
    $items['admin/config/services/message-broker-producer-test'] = array(
