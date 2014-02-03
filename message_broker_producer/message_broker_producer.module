@@ -29,15 +29,26 @@ if ($bla) {
   return $libraries;
 }
 
+/*
+ * Implements hook_theme()
+ */
+function message_broker_producer_theme($existing, $type, $theme, $path) {
+  return array(
+    'message_broker_producer_status' => array(
+      'variables' => array('status' => array()),
+      'template' => 'templates/message-broker-producer-status',
+    ),
+  );
+}
+
 /**
  * Implements hook_menu().
  */
 function message_broker_producer_menu() {
    $items['admin/config/services/message-broker-producer'] = array(
-    'title' => 'Message Broker settings',
-    'description' => 'Manage Message Broker settings.',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('message_broker_producer_config_form'),
+    'title' => 'Message Broker Settings',
+    'description' => 'Manage Message Broker status.',
+    'page callback' => 'message_broker_producer_status',
     'access arguments' => array('administer message_broker_producer'),
     'file' => 'message_broker_producer.admin.inc',
   );
