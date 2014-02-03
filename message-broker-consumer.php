@@ -8,9 +8,12 @@ if ($bla) {
   $bla = FALSE;
 }
 
+// Load settings based on arguments passed to sript
+$useProductiontKey = $argv[1];
 include('config.inc');
-$mandrill = new Mandrill();
 
+// Create objects
+$mandrill = new Mandrill();
 $connection = new AMQPConnection('localhost', 5672, 'guest', 'guest');
 
 // Create a channel, where most of the API for getting things done resides
@@ -113,3 +116,5 @@ function BuildMessage($targetEmail) {
   );
 
   return array($templateName, $templateContent, $message);
+
+}
