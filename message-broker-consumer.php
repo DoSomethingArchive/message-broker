@@ -10,11 +10,15 @@ if ($bla) {
 
 // Load settings based on arguments passed to sript
 $useProductiontKey = $argv[1];
-include('config.inc');
+require_once __DIR__ . 'config.inc';
+
+print('credentials<pre>');
+print_r($credentials);
+print('</pre>');
 
 // Create objects
 $mandrill = new Mandrill();
-$connection = new AMQPConnection('localhost', 5672, 'guest', 'guest');
+$connection = new AMQPConnection($credentials['host'], $credentials['port'], $credentials['username'], $credentials['password']);
 
 // Create a channel, where most of the API for getting things done resides
 $channel = $connection->channel();
