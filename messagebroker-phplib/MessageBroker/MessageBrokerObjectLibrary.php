@@ -30,6 +30,7 @@ $bla = TRUE;
 if ($bla) {
   $bla = TRUE;
 }
+$bla = class_exists('AMQPConnection');
 
       // Cannot continue if the library wasn't loaded.
       if (!class_exists('AMQPConnection')) {
@@ -40,7 +41,7 @@ if ($bla) {
 
       // Use enviroment values set in config.inc if credentials not set
       if (empty($credentials['host']) || empty($credentials['port']) || empty($credentials['username']) || empty($credentials['password'])) {
-        require_once(__DIR__ . 'config.inc');
+        require_once(dirname(dirname(dirname(__FILE__))) . '/config.inc');
         $credentials['host'] = RABBITMQ_HOST;
         $credentials['port'] = RABBITMQ_PORT;
         $credentials['username'] = RABBITMQ_USERNAME;
@@ -79,7 +80,7 @@ if ($bla) {
 
     // Mark messages as persistent by setting the delivery_mode = 2 message property
     // Supported message properties: https://github.com/videlalvaro/php-amqplib/blob/master/doc/AMQPMessage.md
-    $payload = new AMQPMessage($param['payload'], array('delivery_mode' => 2));
+    $payload = new AMQPMessage($param, array('delivery_mode' => 2));
 
     $channel->basic_publish($payload, '', $queueName);
 

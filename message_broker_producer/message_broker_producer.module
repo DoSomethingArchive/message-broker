@@ -9,8 +9,8 @@
  * Implements hook_libraries_info().
  */
 function message_broker_producer_libraries_info() {
-
-$bla = TRUE;
+  
+    $bla = TRUE;
 if ($bla) {
   $bla = TRUE;
 }
@@ -19,7 +19,6 @@ if ($bla) {
     'name' => 'Message Broker PHP Library',
     'vendor url' => 'http://www.dosomething.org/message-broker-phplib',
     'download url' => 'https://github.com/DoSomething/message-broker-phplib',
-    'path' => 'lib',
     'version' => '1.0',
     'files' => array(
       'php' => array('MessageBroker.php'),
@@ -76,7 +75,7 @@ function message_broker_producer_permission() {
 }
 
 /**
- * Makes an authenticated api request to Mobile Commons.
+ * Makes request to Message Broker PHP Library and RabbitMQ.
  *
  * @param $method
  *   The api method to request.
@@ -87,13 +86,50 @@ function message_broker_producer_permission() {
  * @return
  *   A SimpleXML response object.
  */
-function message_broker_producer_request($method) {
+function message_broker_producer_request($method = '', $param = array()) {
+    $bla = TRUE;
+if ($bla) {
+  $bla = TRUE;
+}
+
   $library = libraries_load('messagebroker-phplib');
-  if (empty($library['loaded'])) return FALSE;
+  if (!empty($library['loaded'])) {
+    if (!empty($method)) {
 
-  $MessageBroker = new MessageBroker();
+      // Connect to RabbitMQ
+      $credentials = array(
+        'host' => variable_get('message_broker_producer_rabbitmq_host', ''),
+        'port' => variable_get('message_broker_producer_rabbitmq_port', ''),
+        'username' => variable_get('message_broker_producer_rabbitmq_username', ''),
+        'password' => variable_get('message_broker_producer_rabbitmq_password', ''),
+      );
+      $MessageBroker = new MessageBroker($credentials);
 
-  return $MessageBroker->$method();
+      // Add 'activity_timestamp' and 'application_id' to $param for
+      // produceTransactional method call
+      $param['activity_timestamp'] = time();
+      $application_id + variable_get('message_broker_producer_application_id', NULL);
+      if (!empty($application_id)) {
+        $param['application_id'] = $application_id;
+      }
+      else {
+        drupal_set_message('The application ID has not been set.', 'error');
+        return;
+      }
+
+      $param = json_encode($param);
+      return $MessageBroker->$method($param);
+
+    }
+    else {
+      drupal_set_message('The intended method for message_broker_producer_request() must be defined.', 'error');
+      return;
+    }
+  }
+  else {
+    drupal_set_message('Failed to load messagebroker-phplib library.', 'error');
+    return;
+  }
 }
 
 /**
@@ -103,18 +139,12 @@ function message_broker_producer_request($method) {
  *   TRUE if library is successfully loaded, FALSE if not.
  */
 function message_broker_producer_test() {
-
-  $production_details = array(
-    'activity' => 'signup',
-    'event_type' => 'campaign',
+  $payload = array(
+    'activity' => 'campaign-signup',
     'event_id' => 8012345,
     'email' => 'dlee+messagebroker-test@dosomething.org',
-    'activity_timestamp' => time(),
-    'application_id' => 1
   );
-  $payload = json_encode($production_details);
-
-  message_broker_producer_request('produce', array('queueName' => 'transactionals', 'payload' => $payload));
+  message_broker_producer_request('produceTransactional', $payload);
 }
 
 
