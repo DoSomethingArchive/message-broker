@@ -4,7 +4,7 @@
  * Entry point for Message Broker PHP Library
  */
 
-// Setup autoloader
+// Setup autoloader - loads AMPQ and Mandrill classes
 require_once __DIR__ . '/vendor/autoload.php';
 
 // Load library class

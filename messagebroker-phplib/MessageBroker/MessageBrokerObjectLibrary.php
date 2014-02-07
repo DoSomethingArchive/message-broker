@@ -4,11 +4,7 @@
  * Message Broker class library
  */
 
- $bla = TRUE;
-if ($bla) {
-  $bla = TRUE;
-}
-
+// Use AMQP
 use PhpAmqpLib\Connection\AMQPConnection;
 use PhpAmqpLib\Message\AMQPMessage;
 
@@ -30,10 +26,8 @@ $bla = TRUE;
 if ($bla) {
   $bla = TRUE;
 }
-$bla = class_exists('AMQPConnection');
-
       // Cannot continue if the library wasn't loaded.
-      if (!class_exists('AMQPConnection')) {
+      if (!class_exists('PhpAmqpLib\Connection\AMQPConnection') || !class_exists('PhpAmqpLib\Message\AMQPMessage')) {
         throw new Exception("Could not find php-amqplib. Please download and
           install from https://github.com/videlalvaro/php-amqplib/tree/v1.0. See
           rabbitmq INSTALL file for more details.");

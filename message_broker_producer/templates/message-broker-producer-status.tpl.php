@@ -1,3 +1,9 @@
+<?php
+  $bla = TRUE;
+  if ($bla) {
+    $bla = FALSE;
+  }
+?>
 <h1>RabbitMQ Status</h1>
 <ul>
 <?php foreach ($output as $status_type => $status): ?>

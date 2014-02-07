@@ -9,12 +9,7 @@
  * Implements hook_libraries_info().
  */
 function message_broker_producer_libraries_info() {
-  
-    $bla = TRUE;
-if ($bla) {
-  $bla = TRUE;
-}
-  
+
   $libraries['messagebroker-phplib'] = array(
     'name' => 'Message Broker PHP Library',
     'vendor url' => 'http://www.dosomething.org/message-broker-phplib',
@@ -102,14 +97,15 @@ function message_broker_producer_permission() {
  *   A SimpleXML response object.
  */
 function message_broker_producer_request($method = '', $param = array()) {
-    $bla = TRUE;
-if ($bla) {
-  $bla = TRUE;
-}
 
   $library = libraries_load('messagebroker-phplib');
   if (!empty($library['loaded'])) {
     if (!empty($method)) {
+
+$bla = TRUE;
+if ($bla) {
+  $bla = TRUE;
+}
 
       // Connect to RabbitMQ
       $credentials = array(
