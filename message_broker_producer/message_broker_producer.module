@@ -44,20 +44,35 @@ function message_broker_producer_theme($existing, $type, $theme, $path) {
  * Implements hook_menu().
  */
 function message_broker_producer_menu() {
+
    $items['admin/config/services/message-broker-producer'] = array(
-    'title' => 'Message Broker Settings',
-    'description' => 'Manage Message Broker status.',
+    'title' => 'Message Broker',
+    'description' => 'Message Broker resources - RabbitMQ status and settings.',
     'page callback' => 'message_broker_producer_status',
     'access arguments' => array('administer message_broker_producer'),
     'file' => 'message_broker_producer.admin.inc',
   );
-   $items['admin/config/services/message-broker-producer-test'] = array(
+  $items['admin/config/services/message-broker-producer/status'] = array(
+    'title' => 'RabbitMQ Status',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -10
+  );
+  $items['admin/config/services/message-broker-producer/mq-settings'] = array(
+    'title' => 'RabbitMQ Settings',
+    'type' => MENU_LOCAL_TASK,
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('message_broker_producer_config_form'),
+    'access arguments' => array('administer message_broker_producer'),
+    'file' => 'message_broker_producer.admin.inc',
+  );
+
+  // Testing - remove for release
+  $items['admin/config/services/message-broker-producer-test'] = array(
     'title' => 'Message Broker TEST',
     'description' => 'Message Broker Producer TEST',
     'page callback' => 'message_broker_producer_test',
     'access arguments' => array('administer message_broker_producer'),
   );
-   
 
   return $items;
 }
@@ -146,5 +161,6 @@ function message_broker_producer_test() {
   );
   message_broker_producer_request('produceTransactional', $payload);
 }
+
 
 

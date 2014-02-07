@@ -6,6 +6,43 @@
  */
 
 /**
+ * Configuration form
+ */
+function message_broker_producer_config_form($form, &$form_state) {
+
+  $form['authentication'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('RabbitMQ Authentication')
+  );
+  $form['authentication']['message_broker_producer_rabbitmq_host'] = array(
+    '#type' => 'textfield',
+    '#title' => t('host'),
+    '#required' => TRUE,
+    '#default_value' => variable_get('message_broker_producer_rabbitmq_host', 'localhost'),
+  );
+  $form['authentication']['message_broker_producer_rabbitmq_port'] = array(
+    '#type' => 'textfield',
+    '#title' => t('port'),
+    '#required' => TRUE,
+    '#default_value' => variable_get('message_broker_producer_rabbitmq_port', '5672'),
+  );
+  $form['authentication']['message_broker_producer_rabbitmq_username'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Username'),
+    '#required' => TRUE,
+    '#default_value' => variable_get('message_broker_producer_rabbitmq__username', 'guest'),
+  );
+  $form['authentication']['message_broker_producer_rabbitmq_password'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Password'),
+    '#required' => TRUE,
+    '#default_value' => variable_get('message_broker_producer_rabbitmq_password', 'guest'),
+  );
+
+  return system_settings_form($form);
+}
+
+/**
  * List RabbitMQ status
  */
 function message_broker_producer_status() {
