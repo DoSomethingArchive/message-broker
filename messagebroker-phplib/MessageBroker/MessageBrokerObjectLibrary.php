@@ -36,10 +36,10 @@ if ($bla) {
       // Use enviroment values set in config.inc if credentials not set
       if (empty($credentials['host']) || empty($credentials['port']) || empty($credentials['username']) || empty($credentials['password'])) {
         require_once(dirname(dirname(dirname(__FILE__))) . '/config.inc');
-        $credentials['host'] = RABBITMQ_HOST;
-        $credentials['port'] = RABBITMQ_PORT;
-        $credentials['username'] = RABBITMQ_USERNAME;
-        $credentials['password'] = RABBITMQ_PASSWORD;
+        $credentials['host'] = getenv("RABBITMQ_HOST");
+        $credentials['port'] = getenv("RABBITMQ_PORT");
+        $credentials['username'] = getenv("RABBITMQ_USERNAME");
+        $credentials['password'] = getenv("RABBITMQ_PASSWORD");
       }
 
       // Connect
