@@ -3,21 +3,26 @@
 require_once __DIR__ . '/vendor/autoload.php';
 use PhpAmqpLib\Connection\AMQPConnection;
 
-$bla = TRUE;
-if ($bla) {
-  $bla = FALSE;
-}
-
-// Load settings based on arguments passed to sript
+// Load settings based on arguments passed to sript. It's possible to connect to
+// Mandrill using a test key (default) that skips sending messages to actual
+// users. The test key uses a test email address set via the Mandrill admin
+// dashboard when in test mode. Use "php message-broker-consumer.php 1" to use
+// the production key.
 $useProductiontKey = $argv[1];
-require_once __DIR__ . 'config.inc';
+require_once(dirname(dirname(__FILE__)) . '/config.inc');
 
-print('credentials<pre>');
-print_r($credentials);
-print('</pre>');
-
-// Create objects
+// Mandrill class
 $mandrill = new Mandrill();
+
+// Connection creds for RabbitMQ
+// @todo Consider connecting using different Rabbit user based on application
+// making the connection. Set enviroment vars based on application in config.inc
+$credentials['host'] = getenv("RABBITMQ_HOST");
+$credentials['port'] = getenv("RABBITMQ_PORT");
+$credentials['username'] = getenv("RABBITMQ_USERNAME");
+$credentials['password'] = getenv("RABBITMQ_PASSWORD");
+
+// Connect
 $connection = new AMQPConnection($credentials['host'], $credentials['port'], $credentials['username'], $credentials['password']);
 
 // Create a channel, where most of the API for getting things done resides
@@ -25,7 +30,7 @@ $channel = $connection->channel();
 
 // @todo: Need to get queue name out of setting file. Ideally it's in sync with
 // the Drupal settings that are used to produce the entry. Hard coded for now
-$queueName = 'transactionals';
+$queueName = getenv("TRANSACTIONAL_QUEUE");
 
 // See queue_declare comments in MessageBrokerObjectLibrary - produce function
 // - Declare settings must be the same.
