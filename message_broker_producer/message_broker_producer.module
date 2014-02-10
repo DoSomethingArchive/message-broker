@@ -102,11 +102,6 @@ function message_broker_producer_request($method = '', $param = array()) {
   if (!empty($library['loaded'])) {
     if (!empty($method)) {
 
-$bla = TRUE;
-if ($bla) {
-  $bla = TRUE;
-}
-
       // Connect to RabbitMQ
       $credentials = array(
         'host' => variable_get('message_broker_producer_rabbitmq_host', ''),
@@ -119,7 +114,7 @@ if ($bla) {
       // Add 'activity_timestamp' and 'application_id' to $param for
       // produceTransactional method call
       $param['activity_timestamp'] = time();
-      $application_id + variable_get('message_broker_producer_application_id', NULL);
+      $application_id = variable_get('message_broker_producer_application_id', NULL);
       if (!empty($application_id)) {
         $param['application_id'] = $application_id;
       }
@@ -144,19 +139,21 @@ if ($bla) {
 }
 
 /**
- * Loads StatHat library.
- *
- * @return
- *   TRUE if library is successfully loaded, FALSE if not.
+ * Send test produceTransactional entry
  */
 function message_broker_producer_test() {
   $payload = array(
     'activity' => 'campaign-signup',
     'event_id' => 8012345,
     'email' => 'dlee+messagebroker-test@dosomething.org',
+    'merge_vars' => array(
+      'FNAME' => 'First-Name',
+      'CAMPAIGN-TITLE' => 'Campaign Test Title',
+      'ACTION' => 'Some call to action',
+      'STEP-ONE' => 'Step one from Do It',
+      'STEP-TWO' => 'Step two from Do It',
+      'STEP-THREE' => 'Step three from Do It',
+    ),
   );
   message_broker_producer_request('produceTransactional', $payload);
 }
-
-
-
