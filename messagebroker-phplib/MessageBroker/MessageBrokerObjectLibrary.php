@@ -21,11 +21,7 @@ class MessageBroker
     * @return object
     */
     public function __construct($credentials = array()) {
-      
-$bla = TRUE;
-if ($bla) {
-  $bla = TRUE;
-}
+
       // Cannot continue if the library wasn't loaded.
       if (!class_exists('PhpAmqpLib\Connection\AMQPConnection') || !class_exists('PhpAmqpLib\Message\AMQPMessage')) {
         throw new Exception("Could not find php-amqplib. Please download and
@@ -63,20 +59,31 @@ if ($bla) {
 
     $connection = $this->connection;
     $channel = $connection->channel();
-    
-    $queueName = 'transactional';
+
+    $queueName = getenv("TRANSACTIONAL_QUEUE");
+
+    // Exchange
+    // Use common function to share between producer and consumer
+    // $channel->exchange_declare('direct_logs', 'direct', false, false, false);
 
     // @todo: Move to function to allow producers and consumers to create the
     // same queue. Declare queue as durable, pass third parameter to
     // queue_declare as true. Needs to be set to true to both the producer and
     // consumer queue_declare
+    // If the queue name is not set (using temporary random queue name), use
+    // list($queue_name, ,) = queue_declare(
     $channel->queue_declare($queueName, false, true, false, false);
+
+    // https://www.rabbitmq.com/tutorials/tutorial-four-php.html
+    // $channel->queue_bind($queue_name, 'direct_logs', $severity);
 
     // Mark messages as persistent by setting the delivery_mode = 2 message property
     // Supported message properties: https://github.com/videlalvaro/php-amqplib/blob/master/doc/AMQPMessage.md
     $payload = new AMQPMessage($param, array('delivery_mode' => 2));
 
     $channel->basic_publish($payload, '', $queueName);
+    // Publish with exchange
+    // $channel->basic_publish($msg, 'direct_logs', $severity);
 
     $channel->close();
     $connection->close();
