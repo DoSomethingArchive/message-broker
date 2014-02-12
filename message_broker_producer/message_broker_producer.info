@@ -1,8 +1,0 @@
-name = "Message Broker Producer"
-description = "This module provided producer access to the Message Broker system."
-version = 1.0
-core = 7.x
-
-dependencies[] = libraries
-
-files[] = message_broker_producer.module
