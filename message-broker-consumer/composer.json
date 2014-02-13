@@ -14,7 +14,7 @@
     "require": {
         "php": ">= 5.3.0",
         "videlalvaro/php-amqplib": "v2.1.0",
-        "DoSomething/messagebroker-phplib": "1.0.*",
+        "dosomething/messagebroker-phplib": "1.0.*",
         "mandrill/mandrill": "1.0.50"
     },
     "require-dev": {
