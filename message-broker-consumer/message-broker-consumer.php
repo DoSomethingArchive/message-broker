@@ -1,111 +1,137 @@
 <?php
 
-require_once __DIR__ . '/vendor/autoload.php';
-use PhpAmqpLib\Connection\AMQPConnection;
+  require_once __DIR__ . '/vendor/autoload.php';
 
-// Load settings based on arguments passed to sript. It's possible to connect to
-// Mandrill using a test key (default) that skips sending messages to actual
-// users. The test key uses a test email address set via the Mandrill admin
-// dashboard when in test mode. Use "php message-broker-consumer.php 1" to use
-// the production key.
-$useProductiontKey = $argv[1];
-require_once(dirname(dirname(__FILE__)) . '/config.inc');
+// Use AMQP
+// use PhpAmqpLib\Connection\AMQPConnection;
+// use PhpAmqpLib\Message\AMQPMessage;
+// use MessageComposer\MessageBrokerObjectLibrary;
 
-// Mandrill class
-$mandrill = new Mandrill();
-
-// Connection creds for RabbitMQ
-// @todo Consider connecting using different Rabbit user based on application
-// making the connection. Set enviroment vars based on application in config.inc
-$credentials['host'] = getenv("RABBITMQ_HOST");
-$credentials['port'] = getenv("RABBITMQ_PORT");
-$credentials['username'] = getenv("RABBITMQ_USERNAME");
-$credentials['password'] = getenv("RABBITMQ_PASSWORD");
-
-// Connect
-$connection = new AMQPConnection($credentials['host'], $credentials['port'], $credentials['username'], $credentials['password']);
-
-// Create a channel, where most of the API for getting things done resides
-$channel = $connection->channel();
-
-// @todo: Need to get queue name out of setting file. Ideally it's in sync with
-// the Drupal settings that are used to produce the entry. Hard coded for now
-$queueName = getenv("TRANSACTIONAL_QUEUE");
-
-// See queue_declare comments in MessageBrokerObjectLibrary - produce function
-// - Declare settings must be the same.
-// Note that the queue declared in both the producer and receiver code.
-// It's possible to start the receiver before the sender.
-$channel->queue_declare($queueName, false, true, false, false);
-
-echo ' [*] Waiting for messages. To exit press CTRL+C', "\n";
-
-// @todo: Mandrill functionality will be in callback from basic_consume
-// Messages are delivered asynchronously, a callback in the form of an object
-// will buffer the messages until we're ready to use them. That is what
-// QueueingConsumer does.
-$callback = function($payload){
-  
-  echo " [x] Received payload: ", $payload->body, "\n";
-  
-  // Assemble message details
-  $payloadDetails = unseralize($payload->body);
-  $targetEmail = $payloadDetails[''];
-  list($templateName, $templateContent, $message) = BuildMessage($targetEmail);
-  
-  echo " [x] Built message contents...\n";
-
-  // Send message
-  $mandrillResults = $mandrill->messages->sendTemplate($templateName, $templateContent, $message);
-  
-  $mandrillResults = print_r($mandrillResults, TRUE);
-
-  echo " [x] Sent message via Mandrill:\n";
-  echo $mandrillResults;
-
-  echo " [x] Done", "\n";
-  $payload->delivery_info['channel']->basic_ack($payload->delivery_info['delivery_tag']);
-};
-
-// Fair dispatch
-// Don't give more than one message to a worker at a time. Don't dispatch a new
-// message to a worker until it has processed and acknowledged the previous one.
-// Instead, it will dispatch it to the next worker that is not still busy.
-// AKA: unlimited number of workers with even distribution of tasks based on
-// completion
-// prefetch_count = 1
-$channel->basic_qos(null, 1, null);
-
-// Message acknowledgments are turned off by default.  Fourth parameter in
-// basic_consume to false (true means no ack). This will send an acknowledgment
-// from the worker once the task is complete.
-$channel->basic_consume($queueName, '', false, false, false, false, $callback);
-
-// To see message that have not been "unack"ed.
-// $ rabbitmqctl list_queues name messages_ready messages_unacknowledged
-
-// The code will block while $channel has callbacks. Whenever a message is
-// received the $callback function will be passed the received message.
-while(count($channel->callbacks)) {
-    $channel->wait();
+$bla = FALSE;
+if ($bla) {
+  $bla = TRUE;
 }
 
-$channel->close();
-$connection->close();
+  $credentials = NULL;
+  $MessageBroker = new MessageBroker($credentials);
+
+  $exchangeName = getenv("TRANSACTIONAL_EXCHANGE");
+  $queueName = getenv("TRANSACTIONAL_QUEUE");
+
+  // Confirm config.inc values set
+  if (!$exchangeName || !$queueName) {
+    throw new Exception('config.inc settings missing, exchange and/or queue name not set.');
+  }
+  
+$bla = FALSE;
+if ($bla) {
+  $bla = TRUE;
+}
+
+  // Collect RabbitMQ connection details
+  $connection = $MessageBroker->connection;
+  $channel = $connection->channel();
+
+  // Queue
+  $channel = $MessageBroker->setupQueue($queueName, $channel, NULL);
+
+  // Exchange
+  $channel = $MessageBroker->setupExchange($exchangeName, $channel);
+
+  // Bind exchange to queue for 'transactional' key
+  // queue_bind($queue, $exchange, $routing_key="", $nowait=false, $arguments=null, $ticket=null)
+  $channel->queue_bind($queueName, $exchangeName, '*.*.transactional');
+
+  echo ' [*] Waiting for messages. To exit press CTRL+C', "\n";
+
+
+  $Mandrill = new Mandrill();
+  /**
+   * $callback = function()
+   *   A callback function for basic_consume() that will manage the sending of a
+   *   request to Mandrill based on the details in $payload
+   *
+   * @param string $payload
+   *  An JSON array of the details of the message to be sent
+   */
+  $callback = function($payload) {
+
+$bla = FALSE;
+if ($bla) {
+  $bla = TRUE;
+}
+
+    echo(" [x] Received payload: " . $payload->body . "<br /><br />");
+
+    // Assemble message details
+    // $payloadDetails = unserialize($payload->body);
+    $payloadDetails = json_decode($payload->body);
+    list($templateName, $templateContent, $message) = BuildMessage($payloadDetails);
+
+    echo(" [x] Built message contents...<br /><br />");
+
+    // Send message
+    $mandrillResults = $mandrill->messages->sendTemplate($templateName, $templateContent, $message);
+
+    $mandrillResults = print_r($mandrillResults, TRUE);
+
+    echo(" [x] Sent message via Mandrill:<br />");
+    echo($mandrillResults);
+
+    echo(" [x] Done<br /><br />");
+    $payload->delivery_info['channel']->basic_ack($payload->delivery_info['delivery_tag']);
+};
+
+  // Fair dispatch
+  // Don't give more than one message to a worker at a time. Don't dispatch a new
+  // message to a worker until it has processed and acknowledged the previous one.
+  // Instead, it will dispatch it to the next worker that is not still busy.
+  // AKA: unlimited number of workers with even distribution of tasks based on
+  // completion
+  // prefetch_count = 1
+  // $channel->basic_qos(null, 1, null);
+
+  // Message acknowledgments are turned off by default.  Fourth parameter in
+  // basic_consume to false (true means no ack). This will send an acknowledgment
+  // from the worker once the task is complete.
+  // basic_consume($queue="", $consumer_tag="", $no_local=false, $no_ack=false,
+  //   $exclusive=false, $nowait=false, $callback=null, $ticket=null)
+  $channel->basic_consume($queueName, 'transactionals', false, false, false, false, $callback);
+
+  // To see message that have not been "unack"ed.
+  // $ rabbitmqctl list_queues name messages_ready messages_unacknowledged
+
+  // The code will block while $channel has callbacks. Whenever a message is
+  // received the $callback function will be passed the received message.
+  while(count($channel->callbacks)) {
+      $channel->wait();
+  }
+
+  $channel->close();
+  $connection->close();
 
 /*
+ * BuildMessage()
  * Assembly of message based on Mandrill API: Send-Template
  * https://mandrillapp.com/api/docs/messages.JSON.html#method=send-template
+ *
+ * @param object $payload
+ *   The email address that the message will be built for.
  */
-function BuildMessage($targetEmail) {
-  
+function BuildMessage($payload) {
+
+$bla = FALSE;
+if ($bla) {
+  $bla = TRUE;
+}
+
   $message = array(
     'subject' => 'Test message',
-    'from_email' => $targetEmail,
+    'from_email' => $payload->email,
     'html' => '<p>this is a test message with Mandrill\'s PHP wrapper!.</p>',
-    'to' => array(array('email' => $targetEmail, 'name' => 'Recipient 1')),
+    'to' => array(array('email' => $payload->email, 'name' => 'Recipient 1')),
     'merge_vars' => array(array(
-        'rcpt' => $targetEmail,
+        'rcpt' => $payload->email,
         'vars' =>
         array(
             array(
