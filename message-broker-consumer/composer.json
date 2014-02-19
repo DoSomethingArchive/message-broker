@@ -1,6 +1,7 @@
 {
     "name": "dosomething/message-broker",
     "type": "library",
+    "version": "0.1.0",
     "description": "A general collection of compoents used in teh DoSomething.org Message Broker system..",
     "keywords": ["message broker"],
     "homepage": "https://github.com/DoSomething/message-broker",
