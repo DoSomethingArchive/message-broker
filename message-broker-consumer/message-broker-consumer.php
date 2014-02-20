@@ -125,22 +125,37 @@ if ($bla) {
   $bla = TRUE;
 }
 
+  $mandrillKey = getenv("MANDRILL_APIKEY");
+  $merge_vars = array();
+
+  foreach ($payload->merge_vars as $varName => $varValue) {
+    $merge_vars[] = array(
+      'name' => $varName,
+      'content' => $varValue
+    );
+  }
+
   $message = array(
     'subject' => 'Test message',
     'from_email' => $payload->email,
     'html' => '<p>this is a test message with Mandrill\'s PHP wrapper!.</p>',
-    'to' => array(array('email' => $payload->email, 'name' => 'Recipient 1')),
-    'merge_vars' => array(array(
+    'to' => array(
+      array(
+        'email' => $payload->email,
+        'name' => $payload->merge_vars->FNAME,
+      )
+    ),
+    'merge_vars' => array(
+      array(
         'rcpt' => $payload->email,
-        'vars' =>
-        array(
-            array(
-                'name' => 'FIRSTNAME',
-                'content' => 'Recipient 1 first name'),
-            array(
-                'name' => 'LASTNAME',
-                'content' => 'Last name')
-    ))));
+        'vars' => $merge_vars
+      ),
+    ),
+    'tags' => array(
+      $payload->activity,
+      $payload->event_id,
+    )
+  );
 
   $templateName = 'Stationary';
 
