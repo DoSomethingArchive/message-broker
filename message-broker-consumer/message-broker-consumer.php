@@ -44,44 +44,6 @@ if ($bla) {
 
   echo ' [*] Waiting for messages. To exit press CTRL+C', "\n";
 
-
-  $Mandrill = new Mandrill();
-  /**
-   * $callback = function()
-   *   A callback function for basic_consume() that will manage the sending of a
-   *   request to Mandrill based on the details in $payload
-   *
-   * @param string $payload
-   *  An JSON array of the details of the message to be sent
-   */
-  $callback = function($payload) {
-
-$bla = FALSE;
-if ($bla) {
-  $bla = TRUE;
-}
-
-    echo(" [x] Received payload: " . $payload->body . "<br /><br />");
-
-    // Assemble message details
-    // $payloadDetails = unserialize($payload->body);
-    $payloadDetails = json_decode($payload->body);
-    list($templateName, $templateContent, $message) = BuildMessage($payloadDetails);
-
-    echo(" [x] Built message contents...<br /><br />");
-
-    // Send message
-    $mandrillResults = $mandrill->messages->sendTemplate($templateName, $templateContent, $message);
-
-    $mandrillResults = print_r($mandrillResults, TRUE);
-
-    echo(" [x] Sent message via Mandrill:<br />");
-    echo($mandrillResults);
-
-    echo(" [x] Done<br /><br />");
-    $payload->delivery_info['channel']->basic_ack($payload->delivery_info['delivery_tag']);
-};
-
   // Fair dispatch
   // Don't give more than one message to a worker at a time. Don't dispatch a new
   // message to a worker until it has processed and acknowledged the previous one.
@@ -96,7 +58,12 @@ if ($bla) {
   // from the worker once the task is complete.
   // basic_consume($queue="", $consumer_tag="", $no_local=false, $no_ack=false,
   //   $exclusive=false, $nowait=false, $callback=null, $ticket=null)
-  $channel->basic_consume($queueName, 'transactionals', false, false, false, false, $callback);
+  $channel->basic_consume($queueName, 'transactionals', false, false, false, false, 'ConsumeCallback');
+
+  $bla = FALSE;
+if ($bla) {
+  $bla = TRUE;
+}
 
   // To see message that have not been "unack"ed.
   // $ rabbitmqctl list_queues name messages_ready messages_unacknowledged
@@ -124,8 +91,6 @@ $bla = FALSE;
 if ($bla) {
   $bla = TRUE;
 }
-
-  $mandrillKey = getenv("MANDRILL_APIKEY");
   $merge_vars = array();
 
   foreach ($payload->merge_vars as $varName => $varValue) {
@@ -157,7 +122,7 @@ if ($bla) {
     )
   );
 
-  $templateName = 'Stationary';
+  $templateName = 'unit-test-message';
 
   $templateContent = array(
     array(
@@ -166,5 +131,45 @@ if ($bla) {
   );
 
   return array($templateName, $templateContent, $message);
+
+}
+
+  /**
+   * $callback = function()
+   *   A callback function for basic_consume() that will manage the sending of a
+   *   request to Mandrill based on the details in $payload
+   *
+   * @param string $payload
+   *  An JSON array of the details of the message to be sent
+   */
+function ConsumeCallback($payload) {
+
+$bla = FALSE;
+if ($bla) {
+  $bla = TRUE;
+}
+
+    // Use the Mandrill service
+    $Mandrill = new Mandrill();
+
+    echo(" [x] Received payload: " . $payload->body . "<br /><br />");
+
+    // Assemble message details
+    // $payloadDetails = unserialize($payload->body);
+    $payloadDetails = json_decode($payload->body);
+    list($templateName, $templateContent, $message) = BuildMessage($payloadDetails);
+
+    echo(" [x] Built message contents...<br /><br />");
+
+    // Send message
+    $mandrillResults = $Mandrill->messages->sendTemplate($templateName, $templateContent, $message);
+
+    $mandrillResults = print_r($mandrillResults, TRUE);
+
+    echo(" [x] Sent message via Mandrill:<br />");
+    echo($mandrillResults);
+
+    echo(" [x] Done<br /><br />");
+    $payload->delivery_info['channel']->basic_ack($payload->delivery_info['delivery_tag']);
 
 }
