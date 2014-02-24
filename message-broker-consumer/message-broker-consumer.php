@@ -7,11 +7,6 @@
 // use PhpAmqpLib\Message\AMQPMessage;
 // use MessageComposer\MessageBrokerObjectLibrary;
 
-$bla = FALSE;
-if ($bla) {
-  $bla = TRUE;
-}
-
   $credentials = NULL;
   $MessageBroker = new MessageBroker($credentials);
 
@@ -22,11 +17,6 @@ if ($bla) {
   if (!$exchangeName || !$queueName) {
     throw new Exception('config.inc settings missing, exchange and/or queue name not set.');
   }
-  
-$bla = FALSE;
-if ($bla) {
-  $bla = TRUE;
-}
 
   // Collect RabbitMQ connection details
   $connection = $MessageBroker->connection;
@@ -122,7 +112,23 @@ if ($bla) {
     )
   );
 
-  $templateName = 'unit-test-message';
+  // Select template based on payload details
+  switch ($payload->activity) {
+    case 'user-register':
+      $templateName = 'ds-user-register-01';
+      break;
+    case 'user-password-reset':
+      $templateName = 'ds-user-password-reset-01';
+      break;
+    case 'campaign-signup':
+      $templateName = 'ds-campaign-signup-01';
+      break;
+    case 'campaign-reportback':
+      $templateName = 'ds-campaign-reportback-01';
+      break;
+    default:
+      $templateName = 'ds-message-broker-default-01';
+  }
 
   $templateContent = array(
     array(
@@ -148,7 +154,6 @@ $bla = FALSE;
 if ($bla) {
   $bla = TRUE;
 }
-
     // Use the Mandrill service
     $Mandrill = new Mandrill();
 
