@@ -1,3 +1,6 @@
+# Ignore system files
+.DS_Store
+
 # Ignore configuration files that may contain sensitive information.
 /vendor/
 
@@ -16,3 +19,6 @@ messagebroker-phplib
 
 # Ignore Drupal 7.x producer module
 message_broker_producer
+
+# Ignore consumer apps
+mbc-transactional-email
