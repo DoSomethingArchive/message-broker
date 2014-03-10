@@ -19,6 +19,4 @@ putenv("RABBITMQ_HOST=<HOST NAME>");
 putenv("RABBITMQ_PORT=<PORT>");
 putenv("RABBITMQ_USERNAME=<USERNAME>");
 putenv("RABBITMQ_PASSWORD=<PASSWORD>");
-
-// RabbitMQ Queues
-putenv("TRANSACTIONAL_EXCHANGE=transactionals");
+putenv("RABBITMQ_VHOST=<VHOST>");
