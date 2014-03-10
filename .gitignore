@@ -13,6 +13,7 @@ tests/phpunit.xml
 
 # Ignore config settings with sensative account creds
 config.inc
+messagebroker-config
 
 # Ignore related messagebroker-phplib library
 messagebroker-phplib
@@ -22,3 +23,5 @@ message_broker_producer
 
 # Ignore consumer apps
 mbc-transactional-email
+mbc-registration-email
+
