@@ -12,7 +12,7 @@ composer.lock
 tests/phpunit.xml
 
 # Ignore config settings with sensative account creds
-config.inc
+mb-secure-config.inc
 messagebroker-config
 
 # Ignore related messagebroker-phplib library
