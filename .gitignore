@@ -24,4 +24,4 @@ message_broker_producer
 # Ignore consumer apps
 mbc-transactional-email
 mbc-registration-email
-
+mbc-user-campaign
