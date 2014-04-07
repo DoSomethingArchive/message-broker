@@ -15,13 +15,18 @@ tests/phpunit.xml
 mb-secure-config.inc
 messagebroker-config
 
-# Ignore related messagebroker-phplib library
+# Ignore related messagebroker-phplib and UserAPI libraries
 messagebroker-phplib
+mb-users-api
 
 # Ignore Drupal 7.x producer module
 message_broker_producer
 
-# Ignore consumer apps
+# Ignore consumer and producer apps
 mbc-transactional-email
 mbc-registration-email
 mbc-user-campaign
+mbc-mailchimp-resubscribe
+mbc-userAPI-campaignActivity
+mbc-userAPI-registration
+mbp-user-event
