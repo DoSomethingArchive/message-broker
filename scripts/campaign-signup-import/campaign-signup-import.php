@@ -1,6 +1,6 @@
 <?php
 /*
- * User campaign signup import script from cvs file.
+ * User campaign signup import script from csv file.
  */
 
  // Load up the Composer autoload magic
@@ -18,9 +18,9 @@ class MBI_ProduceCampaignActivity {
   */
   public $messageBroker = NULL;
  
- public function __construct($credentials, $config) {
-  $this->messageBroker = new MessageBroker($credentials, $config);
- }
+  public function __construct($credentials, $config) {
+   $this->messageBroker = new MessageBroker($credentials, $config);
+  }
 
   /**
    * Submit user campaign activity to the UserAPI
@@ -32,10 +32,13 @@ class MBI_ProduceCampaignActivity {
 
     $targetCSVFile = __DIR__ . '/' . $targetCSVFile;
     $data = file($targetCSVFile);
+    
     $signups = preg_split('/\n|\r/', $data[0], -1, PREG_SPLIT_NO_EMPTY);
   
     $count = 0;
     foreach ($signups as $signupCount => $signup) {
+     
+      $count++;
      
       // Skip column titles
       if ($signupCount > 0) {
