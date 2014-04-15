@@ -29,60 +29,72 @@ class MBI_ProduceCampaignActivity {
    *   The contents of the queue entry
    */
   public function produceFromCSV($targetCSVFile) {
+   
+    echo '------- campaign-signup-import MBI_ProduceCampaignActivity produceFromCSV START' . date('D M j G:i:s:u T Y') . ' -------', "\n";
 
     $targetCSVFile = __DIR__ . '/' . $targetCSVFile;
     $data = file($targetCSVFile);
     
-    $signups = preg_split('/\n|\r/', $data[0], -1, PREG_SPLIT_NO_EMPTY);
-  
-    $count = 0;
-    foreach ($signups as $signupCount => $signup) {
-     
-      $count++;
-     
-      // Skip column titles
-      if ($signupCount > 0) {
-    
-        $signupData = explode(',', $signup);
-        
-        $data = array(
-         'activity' => 'campaign_signup',
-         'email' => $signupData[3],
-         'uid' => $signupData[2],
-         'event_id' => $signupData[0],
-         'activity_timestamp' => time(),
-         'application_id' => 2,
-        );
-         
-        switch ($signupData[0]) {
-         
-         case 362:
-          
-           $data['mailchimp_grouping_id'] = 10637;
-           $data['mailchimp_group_name'] = 'ComebackClothes2014';
-           break;
-         
-         case 850:
-          
-           $data['mailchimp_grouping_id'] = 10621;
-           $data['mailchimp_group_name'] = 'MindOnMyMoney2013';
-           break;
-         
-         case 955:
-          
-           $data['mailchimp_grouping_id'] = 10637;
-           $data['mailchimp_group_name'] = 'PBJamSlam2014';
-           break;
-  
-        }
-        
-        $payload = serialize($data);
-        $status = $this->messageBroker->publishMessage($payload);
-  
-      }
+    // Was there a file found
+    if ($data != FALSE) {
 
+      $signups = preg_split('/\n|\r/', $data[0], -1, PREG_SPLIT_NO_EMPTY);
+
+      $count = 0;
+      foreach ($signups as $signupCount => $signup) {
+      
+        $count++;
+      
+        // Skip column titles
+        if ($signupCount > 0) {
+
+          $signupData = explode(',', $signup);
+
+          $data = array(
+            'activity' => 'campaign_signup',
+            'email' => $signupData[3],
+            'uid' => $signupData[2],
+            'event_id' => $signupData[0],
+            'activity_timestamp' => time(),
+            'application_id' => 2,
+          );
+
+          switch ($signupData[0]) {
+
+            case 362:
+              $data['mailchimp_grouping_id'] = 10637;
+              $data['mailchimp_group_name'] = 'ComebackClothes2014';
+              break;
+
+            case 850:
+              $data['mailchimp_grouping_id'] = 10621;
+              $data['mailchimp_group_name'] = 'MindOnMyMoney2013';
+              break;
+
+            case 955:
+              $data['mailchimp_grouping_id'] = 10637;
+              $data['mailchimp_group_name'] = 'PBJamSlam2014';
+              break;
+
+          }
+
+          $payload = serialize($data);
+          $status = $this->messageBroker->publishMessage($payload);
+
+          echo(print_r($data, TRUE) . "\n\n");
+
+        }
+
+      }
+ 
+    }
+    else {
+      trigger_error('Invalid file ' . $targetCSVFile, E_USER_WARNING);
+      return FALSE;
     }
 
+    echo $count . 'email addresses imported.', "\n";
+    echo '------- campaign-signup-import MBI_ProduceCampaignActivity produceFromCSV END' . date('D M j G:i:s:u T Y') . ' -------', "\n";
   }
 
 }
