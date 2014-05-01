@@ -1,0 +1,14 @@
+# Ignore configuration files that may contain sensitive information.
+mb-config.inc
+mb-secure-config.inc
+
+# Ignor composer working files
+composer.phar
+composer.lock
+/vendor/
+
+# Ignor testing working files
+tests/phpunit.xml
+
+# Ignor OSX system files
+.DS_Store
