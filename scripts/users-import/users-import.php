@@ -1,6 +1,32 @@
 <?php
 /*
  * Drupal records from users table import script from csv file.
+ *
+ * Typical import data comes from the Drupal user table:
+ *
+ * SELECT
+ *   u.uid AS "UID",
+ *   u.name AS "User Name",
+ *   u.mail AS "eMail",
+ *   u.created AS "Created",
+ *   fdffn.field_first_name_value AS "First Name",
+ *   fdfln.field_last_name_value AS "Last Name",
+ *   fdfm.field_mobile_value AS "Mobile",
+ *   fdfb.field_birthdate_value AS "Birthday"
+ * FROM
+ *   users u
+ *   LEFT JOIN
+ *     field_data_field_mobile fdfm ON (fdfm.entity_id = u.uid)
+ *   LEFT JOIN
+ *     field_data_field_birthdate fdfb ON (fdfb.entity_id = u.uid)
+ *   LEFT JOIN
+ *     field_data_field_first_name fdffn ON (fdffn.entity_id = u.uid)
+ *   LEFT JOIN
+ *     field_data_field_last_name fdfln ON (fdfln.entity_id = u.uid)
+ *   INTO OUTFILE '/home/dosomething/temp/users20140427.csv'
+ *   FIELDS TERMINATED BY ','
+ *   ENCLOSED BY '"'
+ *   LINES TERMINATED BY '\n'
  */
 
  // Load up the Composer autoload magic
