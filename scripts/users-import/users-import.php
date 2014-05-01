@@ -115,38 +115,43 @@ class MBI_ProduceUsersImport {
 
 }
 
-// Settings
-$credentials = array(
-  'host' =>  getenv("RABBITMQ_HOST"),
-  'port' => getenv("RABBITMQ_PORT"),
-  'username' => getenv("RABBITMQ_USERNAME"),
-  'password' => getenv("RABBITMQ_PASSWORD"),
-  'vhost' => getenv("RABBITMQ_VHOST"),
-);
+if (isset($_GET["targetFile"])) {
+  $targetFile = $_GET["targetFile"];
 
-$config = array(
-  'exchange' => array(
-    'name' => getenv("MB_TRANSACTIONAL_EXCHANGE"),
-    'type' => getenv("MB_TRANSACTIONAL_EXCHANGE_TYPE"),
-    'passive' => getenv("MB_TRANSACTIONAL_EXCHANGE_PASSIVE"),
-    'durable' => getenv("MB_TRANSACTIONAL_EXCHANGE_DURABLE"),
-    'auto_delete' => getenv("MB_TRANSACTIONAL_EXCHANGE_AUTO_DELETE"),
-  ),
-  'queue' => array(
-    array(
-      'name' => getenv("MB_USER_API_REGISTRATION_QUEUE"),
-      'passive' => getenv("MB_USER_API_REGISTRATION_QUEUE_PASSIVE"),
-      'durable' => getenv("MB_USER_API_REGISTRATION_QUEUE_DURABLE"),
-      'exclusive' => getenv("MB_USER_API_REGISTRATION_QUEUE_EXCLUSIVE"),
-      'auto_delete' => getenv("MB_USER_API_REGISTRATION_QUEUE_AUTO_DELETE"),
-      'bindingKey' => getenv("MB_USER_API_REGISTRATION_QUEUE_TOPIC_MB_TRANSACTIONAL_EXCHANGE_PATTERN"),
+  // Settings
+  $credentials = array(
+    'host' =>  getenv("RABBITMQ_HOST"),
+    'port' => getenv("RABBITMQ_PORT"),
+    'username' => getenv("RABBITMQ_USERNAME"),
+    'password' => getenv("RABBITMQ_PASSWORD"),
+    'vhost' => getenv("RABBITMQ_VHOST"),
+  );
+
+  $config = array(
+    'exchange' => array(
+      'name' => getenv("MB_TRANSACTIONAL_EXCHANGE"),
+      'type' => getenv("MB_TRANSACTIONAL_EXCHANGE_TYPE"),
+      'passive' => getenv("MB_TRANSACTIONAL_EXCHANGE_PASSIVE"),
+      'durable' => getenv("MB_TRANSACTIONAL_EXCHANGE_DURABLE"),
+      'auto_delete' => getenv("MB_TRANSACTIONAL_EXCHANGE_AUTO_DELETE"),
     ),
-  ),
-  'routingKey' => 'user.registration.transactional.import',
-);
+    'queue' => array(
+      array(
+        'name' => getenv("MB_USER_API_REGISTRATION_QUEUE"),
+        'passive' => getenv("MB_USER_API_REGISTRATION_QUEUE_PASSIVE"),
+        'durable' => getenv("MB_USER_API_REGISTRATION_QUEUE_DURABLE"),
+        'exclusive' => getenv("MB_USER_API_REGISTRATION_QUEUE_EXCLUSIVE"),
+        'auto_delete' => getenv("MB_USER_API_REGISTRATION_QUEUE_AUTO_DELETE"),
+        'bindingKey' => getenv("MB_USER_API_REGISTRATION_QUEUE_TOPIC_MB_TRANSACTIONAL_EXCHANGE_PATTERN"),
+      ),
+    ),
+    'routingKey' => 'user.registration.transactional.import',
+  );
 
-$targetFile = 'users20140427.csv';
-
-// Kick off
-$mbi = new MBI_ProduceUsersImport($credentials, $config);
-$mbi->produceFromCSV($targetFile);
+  // Kick off
+  $mbi = new MBI_ProduceUsersImport($credentials, $config);
+  $mbi->produceFromCSV($targetFile);
+}
+else {
+  echo('Target file needs to be provided as a parameter (?targetFile=).' . "\n\n");
+}
