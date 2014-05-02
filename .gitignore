@@ -29,6 +29,8 @@ mbc-user-campaign
 mbc-mailchimp-resubscribe
 mbc-userAPI-campaignActivity
 mbc-userAPI-registration
+mbc-user-event
+mbc-heartbeat
 mbp-mailchimp-webhooks
 mbp-user-event
 mbp-heartbeat
