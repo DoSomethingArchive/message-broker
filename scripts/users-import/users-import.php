@@ -160,5 +160,5 @@ if (isset($argv[1]) && $argv[1] != '') {
   $mbi->produceFromCSV($targetFile);
 }
 else {
-  echo('Target file needs to be provided as a parameter (?targetFile=).' . "\n\n");
+  echo('Target file not defined.' . "\n\n");
 }
