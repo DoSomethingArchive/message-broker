@@ -30,10 +30,12 @@ class MBI_ProduceUsersImport {
    */
   public function produceFromCSV($targetCSVFile) {
 
-    echo '------- users-import-import MBI_ProduceUsersImport produceFromCSV START' . date('D M j G:i:s:u T Y') . ' -------', "\n";
+    echo '------- users-import-import MBI_ProduceUsersImport produceFromCSV START: ' . date('D M j G:i:s T Y') . ' -------', "\n";
 
     $targetCSVFile = __DIR__ . '/' . $targetCSVFile;
     $data = file($targetCSVFile);
+
+    echo '------- users-import-import MBI_ProduceUsersImport produceFromCSV: ' . $targetCSVFile . ' loaded - ' . date('D M j G:i:s T Y') . ' -------' .  "\n";
 
     // Was there a file found
     if ($data != FALSE) {
@@ -45,6 +47,8 @@ class MBI_ProduceUsersImport {
 
         // Skip column titles
         if ($userCount > 0) {
+
+          echo '------- users-import->MBI_ProduceUsersImport user: ' . print_r($user, TRUE) . ' - ' . date('D M j G:i:s T Y') . ' -------', "\n";
 
           $userData = explode(',', $user);
 
@@ -97,7 +101,10 @@ class MBI_ProduceUsersImport {
           );
 
           $payload = serialize($payload);
+
+          echo '------- users-import->MBI_ProduceUsersImport publishMessage #' . $count . ' START: ' . date('D M j G:i:s T Y') . ' -------', "\n";
           $this->messageBroker->publishMessage($payload);
+          echo '------- users-import->MBI_ProduceUsersImport publishMessage #' . $count . ' END: ' . date('D M j G:i:s T Y') . ' -------', "\n\n";
 
         }
 
@@ -110,13 +117,13 @@ class MBI_ProduceUsersImport {
     }
 
     echo $count . ' "user_register" submitted to User API.', "\n";
-    echo '------- users-import MBI_ProduceUsersImport produceFromCSV END' . date('D M j G:i:s:u T Y') . ' -------', "\n";
+    echo '------- users-import MBI_ProduceUsersImport produceFromCSV END' . date('D M j G:i:s T Y') . ' -------', "\n";
   }
 
 }
 
-if (isset($_GET["targetFile"])) {
-  $targetFile = $_GET["targetFile"];
+if (isset($argv[1]) && $argv[1] != '') {
+  $targetFile = $argv[1];
 
   // Settings
   $credentials = array(
