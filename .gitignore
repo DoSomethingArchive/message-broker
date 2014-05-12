@@ -34,3 +34,6 @@ mbc-heartbeat
 mbp-mailchimp-webhooks
 mbp-user-event
 mbp-heartbeat
+mb-campaigns-api
+mbc-campaign-cache
+mbp-user-digest
