@@ -1,37 +1,24 @@
 message-broker v0.1.2
 ==============
 
-A system to manage communication / messages sent to DoSomething.org members.
+A system to manage communication / messages sent between applications and DoSomething.org members.
 The system is loosely coupled between producers:
 
-- Drupal 7 websites, New and Old world: http://dosomething.org
+- Drupal 7 website (primary producer)
 - Other web applications
 
-and consumers that issue email requests to vendors. Currently Mandrill is the
-only vendor for sending messages that's supported:
+and consumers that issue requests to vendors (APIs) both internal (MB User API and MB Campaigns API). Mandrill and Mailchimp are external vendors for sending messages:
 
 - Mandrill: https://mandrillapp.com
+- Mailchimp: http://mailchimp.com/
 
-RabbitMQ () is used to manage the communication between the producer and
-consumers. RabbitMQ acts as a communication bus that uses the AMQP
-(http://amqp.org) protocall. AMQP is an open, general-purpose protocol for
+RabbitMQ (http://www.rabbitmq.com) is used to manage the communication between the producer and consumer applications. RabbitMQ acts as a communication bus that uses the AMQP (http://amqp.org) protocall. AMQP is an open, general-purpose protocol for
 messaging.
-
-
-Message Broker Producer
-=================
-
-A dripal 7.x module that provides producer access to the Message Broker system.
-* Wrapper function for Object Library calls
-* Simple administration page for authentication details
-
-Requirements:
-Message Broker PHP Library - https://github.com/DoSomething/message-broker
 
 Sponsored by DoSomething.org
 
 
 Development Plan
 =================
-The current development plan (2014-02-06 - Cliff v 0.1.0) diagram with related notes:
-https://raw.github.com/DoSomething/message-broker/master/resources/MessageBrokerDevPlan-Cliffv1_0_0-140206.jpg
+The current development plan (2014-05-26 - Newman v 0.5.0) diagram with related notes:
+https://raw.githubusercontent.com/DoSomething/message-broker/master/resources/0.5.0-Newman-140526.jpg
