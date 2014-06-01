@@ -30,7 +30,7 @@ class MBI_ProduceCampaignActivity {
    */
   public function produceFromCSV($targetCSVFile) {
 
-    echo '------- campaign-signup-import MBI_ProduceCampaignActivity produceFromCSV START' . date('D M j G:i:s:u T Y') . ' -------', "\n";
+    echo '------- campaign-reportback-import MBI_ProduceCampaignActivity produceFromCSV START' . date('D M j G:i:s T Y') . ' -------', "\n";
     
     $targetCSVFile = __DIR__ . '/' . $targetCSVFile;
     $signups = file($targetCSVFile);
@@ -44,18 +44,20 @@ class MBI_ProduceCampaignActivity {
           $signup = str_replace('"', '', $signup);
           $signup = str_replace("\n", '', $signup);
           $signupData = explode(',', $signup);
-          $data = array(
-            'activity' => 'campaign_signup',
-            'email' => $signupData[1],
-            'uid' => $signupData[0],
-            'event_id' => $signupData[2],
-            'activity_timestamp' => $signupData[3],
-            'application_id' => 2,
-          );
-
-          $payload = serialize($data);
-          $status = $this->messageBroker->publishMessage($payload);
-          $count ++;
+          if ($signupData[1] != '') {
+           $data = array(
+             'activity' => 'campaign_reportback',
+             'email' => $signupData[1],
+             'uid' => $signupData[0],
+             'event_id' => $signupData[2],
+             'activity_timestamp' => $signupData[3],
+             'application_id' => 2,
+           );
+ 
+           $payload = serialize($data);
+           $status = $this->messageBroker->publishMessage($payload);
+           $count++;
+          }
 
         }
 
@@ -68,7 +70,7 @@ class MBI_ProduceCampaignActivity {
     }
 
     echo $signupCount . 'email addresses imported.', "\n";
-    echo '------- campaign-signup-import MBI_ProduceCampaignActivity produceFromCSV : ' . $count . ' added/updated... - END' . date('D M j G:i:s:u T Y') . ' -------', "\n";
+    echo '------- campaign-reportback-import MBI_ProduceCampaignActivity produceFromCSV - ' . $count . ' added... - END' . date('D M j G:i:s T Y') . ' -------', "\n";
   }
 
 }
@@ -103,7 +105,7 @@ $config = array(
   'routingKey' => 'campaign.drupal.import',
 );
 
-$targetFile = 'campaign-signup20140528.csv';
+$targetFile = 'campaign-reportback20140528.csv';
 
 // Kick off
 $mbi = new MBI_ProduceCampaignActivity($credentials, $config);
