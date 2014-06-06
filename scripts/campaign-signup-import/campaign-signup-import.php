@@ -30,7 +30,7 @@ class MBI_ProduceCampaignActivity {
    */
   public function produceFromCSV($targetCSVFile) {
 
-    echo '------- campaign-signup-import MBI_ProduceCampaignActivity produceFromCSV START' . date('D M j G:i:s:u T Y') . ' -------', "\n";
+    echo '------- campaign-signup-import MBI_ProduceCampaignActivity produceFromCSV START' . date('D M j G:i:s T Y') . ' -------', "\n";
     
     $targetCSVFile = __DIR__ . '/' . $targetCSVFile;
     $signups = file($targetCSVFile);
@@ -68,43 +68,49 @@ class MBI_ProduceCampaignActivity {
     }
 
     echo $signupCount . 'email addresses imported.', "\n";
-    echo '------- campaign-signup-import MBI_ProduceCampaignActivity produceFromCSV : ' . $count . ' added/updated... - END' . date('D M j G:i:s:u T Y') . ' -------', "\n";
+    echo '------- campaign-signup-import MBI_ProduceCampaignActivity produceFromCSV : ' . $count . ' added/updated... - END' . date('D M j G:i:s T Y') . ' -------', "\n";
   }
 
 }
 
-// Settings
-$credentials = array(
-  'host' =>  getenv("RABBITMQ_HOST"),
-  'port' => getenv("RABBITMQ_PORT"),
-  'username' => getenv("RABBITMQ_USERNAME"),
-  'password' => getenv("RABBITMQ_PASSWORD"),
-  'vhost' => getenv("RABBITMQ_VHOST"),
-);
+if (isset($argv[1]) && $argv[1] != '') {
+  $targetFile = $argv[1];
 
-$config = array(
-  'exchange' => array(
-    'name' => getenv("MB_TRANSACTIONAL_EXCHANGE"),
-    'type' => getenv("MB_TRANSACTIONAL_EXCHANGE_TYPE"),
-    'passive' => getenv("MB_TRANSACTIONAL_EXCHANGE_PASSIVE"),
-    'durable' => getenv("MB_TRANSACTIONAL_EXCHANGE_DURABLE"),
-    'auto_delete' => getenv("MB_TRANSACTIONAL_EXCHANGE_AUTO_DELETE"),
-  ),
-  'queue' => array(
-    array(
-     'name' => getenv("MB_USER_API_CAMPAIGN_ACTIVITY_QUEUE"),
-     'passive' => getenv("MB_USER_API_CAMPAIGN_ACTIVITY_QUEUE_PASSIVE"),
-     'durable' => getenv("MB_USER_API_CAMPAIGN_ACTIVITY_QUEUE_DURABLE"),
-     'exclusive' => getenv("MB_USER_API_CAMPAIGN_ACTIVITY_QUEUE_EXCLUSIVE"),
-     'auto_delete' => getenv("MB_USER_API_CAMPAIGN_ACTIVITY_QUEUE_AUTO_DELETE"),
-     'bindingKey' => getenv("MB_USER_API_CAMPAIGN_ACTIVITY_QUEUE_TOPIC_MB_TRANSACTIONAL_EXCHANGE_PATTERN"),
+  // Settings
+  $credentials = array(
+    'host' =>  getenv("RABBITMQ_HOST"),
+    'port' => getenv("RABBITMQ_PORT"),
+    'username' => getenv("RABBITMQ_USERNAME"),
+    'password' => getenv("RABBITMQ_PASSWORD"),
+    'vhost' => getenv("RABBITMQ_VHOST"),
+  );
+  
+  $config = array(
+    'exchange' => array(
+      'name' => getenv("MB_TRANSACTIONAL_EXCHANGE"),
+      'type' => getenv("MB_TRANSACTIONAL_EXCHANGE_TYPE"),
+      'passive' => getenv("MB_TRANSACTIONAL_EXCHANGE_PASSIVE"),
+      'durable' => getenv("MB_TRANSACTIONAL_EXCHANGE_DURABLE"),
+      'auto_delete' => getenv("MB_TRANSACTIONAL_EXCHANGE_AUTO_DELETE"),
     ),
-  ),
-  'routingKey' => 'campaign.drupal.import',
-);
+    'queue' => array(
+      array(
+       'name' => getenv("MB_USER_API_CAMPAIGN_ACTIVITY_QUEUE"),
+       'passive' => getenv("MB_USER_API_CAMPAIGN_ACTIVITY_QUEUE_PASSIVE"),
+       'durable' => getenv("MB_USER_API_CAMPAIGN_ACTIVITY_QUEUE_DURABLE"),
+       'exclusive' => getenv("MB_USER_API_CAMPAIGN_ACTIVITY_QUEUE_EXCLUSIVE"),
+       'auto_delete' => getenv("MB_USER_API_CAMPAIGN_ACTIVITY_QUEUE_AUTO_DELETE"),
+       'bindingKey' => getenv("MB_USER_API_CAMPAIGN_ACTIVITY_QUEUE_TOPIC_MB_TRANSACTIONAL_EXCHANGE_PATTERN"),
+      ),
+    ),
+    'routingKey' => 'campaign.drupal.import',
+  );
+ 
+  // Kick off
+  $mbi = new MBI_ProduceCampaignActivity($credentials, $config);
+  $mbi->produceFromCSV($targetFile);
 
-$targetFile = 'campaign-signup20140528.csv';
-
-// Kick off
-$mbi = new MBI_ProduceCampaignActivity($credentials, $config);
-$mbi->produceFromCSV($targetFile);
+}
+else {
+  echo('Target file needs to be provided as a parameter (?targetFile=).' . "\n\n");
+}
