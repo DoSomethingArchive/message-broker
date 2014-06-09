@@ -43,8 +43,6 @@ class MBI_ProduceUsersImport {
       $count = 0;
       foreach ($data as $userCount => $user) {
 
-        $count++;
-
         // Skip column titles
         if ($userCount > 0) {
 
@@ -86,25 +84,32 @@ class MBI_ProduceUsersImport {
             $birthdate = NULL;
           }
 
-          $payload = array(
-            'activity' => 'user_register',
-            'email' => str_replace('"', '', $userData[2]),
-            'mobile' => $mobile,
-            'uid' => (int) str_replace('"', '', $userData[0]),
-            'birthdate' => $birthdate,
-            'merge_vars' => array(
-              'FNAME' => $firstname,
-              'LNAME' => $lastname,
-            ),
-            'activity_timestamp' => (int) str_replace('"', '', $userData[3]),
-            'application_id' => 0,
-          );
+          $email = str_replace('"', '', $userData[2]);
+          if ($email != '' && strpos($email, '@') > 0) {
+           
+            $payload = array(
+              'activity' => 'user_register',
+              'email' => $email,
+              'mobile' => $mobile,
+              'uid' => (int) str_replace('"', '', $userData[0]),
+              'birthdate' => $birthdate,
+              'merge_vars' => array(
+                'FNAME' => $firstname,
+                'LNAME' => $lastname,
+              ),
+              'activity_timestamp' => (int) str_replace('"', '', $userData[3]),
+              'application_id' => 0,
+              'subscribed' => 0,
+            );
+  
+            $payload = serialize($payload);
+            $count++;
+  
+            echo '------- users-import->MBI_ProduceUsersImport publishMessage #' . $count . ' START: ' . date('D M j G:i:s T Y') . ' -------', "\n";
+            $this->messageBroker->publishMessage($payload);
+            echo '------- users-import->MBI_ProduceUsersImport publishMessage #' . $count . ' END: ' . date('D M j G:i:s T Y') . ' -------', "\n\n";
 
-          $payload = serialize($payload);
-
-          echo '------- users-import->MBI_ProduceUsersImport publishMessage #' . $count . ' START: ' . date('D M j G:i:s T Y') . ' -------', "\n";
-          $this->messageBroker->publishMessage($payload);
-          echo '------- users-import->MBI_ProduceUsersImport publishMessage #' . $count . ' END: ' . date('D M j G:i:s T Y') . ' -------', "\n\n";
+          }
 
         }
 
@@ -121,6 +126,8 @@ class MBI_ProduceUsersImport {
   }
 
 }
+
+$argv[1] = $targetCSVFile = 'drupalUsers20140609.csv';
 
 if (isset($argv[1]) && $argv[1] != '') {
   $targetFile = $argv[1];
