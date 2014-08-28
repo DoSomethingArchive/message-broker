@@ -32,8 +32,15 @@ class MBI_ProduceCampaignActivity {
 
     echo '------- campaign-signup-import MBI_ProduceCampaignActivity produceFromCSV START' . date('D M j G:i:s T Y') . ' -------', "\n";
     
+    
+$bla = FALSE;
+if ($bla) {
+  $bla = TRUE;
+}
+    
     $targetCSVFile = __DIR__ . '/' . $targetCSVFile;
     $signups = file($targetCSVFile);
+    $signups = explode("\n", $signups);
     $count = 0;
 
     // Was there a file found
@@ -72,6 +79,8 @@ class MBI_ProduceCampaignActivity {
   }
 
 }
+
+// $argv[1] = 'campaign-signup-mnelson-20140627.csv';
 
 if (isset($argv[1]) && $argv[1] != '') {
   $targetFile = $argv[1];

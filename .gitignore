@@ -10,6 +10,7 @@ composer.lock
 
 # Ignore testing working files
 tests/phpunit.xml
+*.csv
 
 # Ignore config settings with sensative account creds
 mb-secure-config.inc
@@ -31,9 +32,15 @@ mbc-userAPI-campaignActivity
 mbc-userAPI-registration
 mbc-user-event
 mbc-heartbeat
+mbc-digest-email
+mbc-campaign-cache
+mbc-user-import
+mbc-registration-mobile
+mbc-activityStats
 mbp-mailchimp-webhooks
 mbp-user-event
 mbp-heartbeat
 mb-campaigns-api
 mbc-campaign-cache
 mbp-user-digest
+mbp-user-import

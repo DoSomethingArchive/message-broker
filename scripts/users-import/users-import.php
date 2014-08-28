@@ -33,26 +33,32 @@ class MBI_ProduceUsersImport {
     echo '------- users-import-import MBI_ProduceUsersImport produceFromCSV START: ' . date('D M j G:i:s T Y') . ' -------', "\n";
 
     $targetCSVFile = __DIR__ . '/' . $targetCSVFile;
-    $data = file($targetCSVFile);
+    // $data = file($targetCSVFile);
+    
+    $file_handle = FALSE;
+    $file_handle = fopen($targetCSVFile, "r");
+
 
     echo '------- users-import-import MBI_ProduceUsersImport produceFromCSV: ' . $targetCSVFile . ' loaded - ' . date('D M j G:i:s T Y') . ' -------' .  "\n";
 
     // Was there a file found
-    if ($data != FALSE) {
+    if ($file_handle != FALSE) {
 
       $count = 0;
-      foreach ($data as $userCount => $user) {
+      $userCount = 0;
+      while (!feof($file_handle)) {
+       $user = fgets($file_handle);
+       
+      //foreach ($data as $userCount => $user) {
 
         // Skip column titles
         if ($userCount > 0) {
-
-          echo '------- users-import->MBI_ProduceUsersImport user: ' . print_r($user, TRUE) . ' - ' . date('D M j G:i:s T Y') . ' -------', "\n";
 
           $userData = explode(',', $user);
 
           // First Name - remove \N character when blank
           if ($userData[4] == "\N") {
-           $firstname = NULL;
+            $firstname = NULL;
           }
           else {
             $firstname = str_replace('"', '', $userData[4]);
@@ -60,7 +66,7 @@ class MBI_ProduceUsersImport {
 
           // Last Name - remove \N character when blank
           if ($userData[5] == "\N") {
-           $lastname = NULL;
+            $lastname = NULL;
           }
           else {
             $lastname = str_replace('"', '', $userData[5]);
@@ -85,7 +91,12 @@ class MBI_ProduceUsersImport {
           }
 
           $email = str_replace('"', '', $userData[2]);
-          if ($email != '' && strpos($email, '@') > 0) {
+
+          $bla = strpos($email, '@');
+          $bla2 = strpos($email, '@mobile');
+          
+          if ($email != '' && strpos($email, '@') > 0 && strpos($email, '@mobile') == 0) {
+
            
             $payload = array(
               'activity' => 'user_register',
@@ -101,6 +112,8 @@ class MBI_ProduceUsersImport {
               'application_id' => 0,
               'subscribed' => 0,
             );
+            
+            echo '------- users-import->MBI_ProduceUsersImport payload: ' . print_r($payload, TRUE) . ' - ' . date('D M j G:i:s T Y') . ' -------', "\n";
   
             $payload = serialize($payload);
             $count++;
@@ -113,7 +126,9 @@ class MBI_ProduceUsersImport {
 
         }
 
+        $userCount++;
       }
+      fclose($file_handle);
  
     }
     else {
@@ -132,40 +147,44 @@ $argv[1] = $targetCSVFile = 'drupalUsers20140609.csv';
 if (isset($argv[1]) && $argv[1] != '') {
   $targetFile = $argv[1];
 
-  // Settings
-  $credentials = array(
-    'host' =>  getenv("RABBITMQ_HOST"),
-    'port' => getenv("RABBITMQ_PORT"),
-    'username' => getenv("RABBITMQ_USERNAME"),
-    'password' => getenv("RABBITMQ_PASSWORD"),
-    'vhost' => getenv("RABBITMQ_VHOST"),
-  );
-
-  $config = array(
-    'exchange' => array(
-      'name' => getenv("MB_TRANSACTIONAL_EXCHANGE"),
-      'type' => getenv("MB_TRANSACTIONAL_EXCHANGE_TYPE"),
-      'passive' => getenv("MB_TRANSACTIONAL_EXCHANGE_PASSIVE"),
-      'durable' => getenv("MB_TRANSACTIONAL_EXCHANGE_DURABLE"),
-      'auto_delete' => getenv("MB_TRANSACTIONAL_EXCHANGE_AUTO_DELETE"),
-    ),
-    'queue' => array(
-      array(
-        'name' => getenv("MB_USER_API_REGISTRATION_QUEUE"),
-        'passive' => getenv("MB_USER_API_REGISTRATION_QUEUE_PASSIVE"),
-        'durable' => getenv("MB_USER_API_REGISTRATION_QUEUE_DURABLE"),
-        'exclusive' => getenv("MB_USER_API_REGISTRATION_QUEUE_EXCLUSIVE"),
-        'auto_delete' => getenv("MB_USER_API_REGISTRATION_QUEUE_AUTO_DELETE"),
-        'bindingKey' => getenv("MB_USER_API_REGISTRATION_QUEUE_TOPIC_MB_TRANSACTIONAL_EXCHANGE_PATTERN"),
-      ),
-    ),
-    'routingKey' => 'user.registration.transactional.import',
-  );
-
-  // Kick off
-  $mbi = new MBI_ProduceUsersImport($credentials, $config);
-  $mbi->produceFromCSV($targetFile);
+$targetCSVFile = '';
+if (!isset($argv[1])) {
+  $targetFile = 'mlideyUsers20140612.csv';
 }
 else {
-  echo('Target file not defined.' . "\n\n");
+  $targetFile = $argv[1];
 }
+
+// Settings
+$credentials = array(
+  'host' =>  getenv("RABBITMQ_HOST"),
+  'port' => getenv("RABBITMQ_PORT"),
+  'username' => getenv("RABBITMQ_USERNAME"),
+  'password' => getenv("RABBITMQ_PASSWORD"),
+  'vhost' => getenv("RABBITMQ_VHOST"),
+);
+
+$config = array(
+  'exchange' => array(
+    'name' => getenv("MB_TRANSACTIONAL_EXCHANGE"),
+    'type' => getenv("MB_TRANSACTIONAL_EXCHANGE_TYPE"),
+    'passive' => getenv("MB_TRANSACTIONAL_EXCHANGE_PASSIVE"),
+    'durable' => getenv("MB_TRANSACTIONAL_EXCHANGE_DURABLE"),
+    'auto_delete' => getenv("MB_TRANSACTIONAL_EXCHANGE_AUTO_DELETE"),
+  ),
+  'queue' => array(
+    array(
+      'name' => getenv("MB_USER_API_REGISTRATION_QUEUE"),
+      'passive' => getenv("MB_USER_API_REGISTRATION_QUEUE_PASSIVE"),
+      'durable' => getenv("MB_USER_API_REGISTRATION_QUEUE_DURABLE"),
+      'exclusive' => getenv("MB_USER_API_REGISTRATION_QUEUE_EXCLUSIVE"),
+      'auto_delete' => getenv("MB_USER_API_REGISTRATION_QUEUE_AUTO_DELETE"),
+      'bindingKey' => getenv("MB_USER_API_REGISTRATION_QUEUE_TOPIC_MB_TRANSACTIONAL_EXCHANGE_PATTERN"),
+    ),
+  ),
+  'routingKey' => 'user.registration.transactional.import',
+);
+
+// Kick off
+$mbi = new MBI_ProduceUsersImport($credentials, $config);
+$mbi->produceFromCSV($targetFile);

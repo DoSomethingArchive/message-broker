@@ -30,7 +30,7 @@ class MBI_ProduceCampaignActivity {
    */
   public function produceFromCSV($targetCSVFile) {
 
-    echo '------- campaign-reportback-import MBI_ProduceCampaignActivity produceFromCSV START' . date('D M j G:i:s T Y') . ' -------', "\n";
+    echo '------- campaign-reportback-import MBI_ProduceCampaignActivity produceFromCSV START: ' . $targetCSVFile . ' - ' . date('D M j G:i:s T Y') . ' -------', "\n";
     
     $targetCSVFile = __DIR__ . '/' . $targetCSVFile;
     $signups = file($targetCSVFile);
@@ -39,26 +39,24 @@ class MBI_ProduceCampaignActivity {
     // Was there a file found
     if ($signups != FALSE) {
       foreach ($signups as $signupCount => $signup) {
-        // Skip column titles
-        if ($signupCount > 0) {
-          $signup = str_replace('"', '', $signup);
-          $signup = str_replace("\n", '', $signup);
-          $signupData = explode(',', $signup);
-          if ($signupData[1] != '') {
-           $data = array(
-             'activity' => 'campaign_reportback',
-             'email' => $signupData[1],
-             'uid' => $signupData[0],
-             'event_id' => $signupData[2],
-             'activity_timestamp' => $signupData[3],
-             'application_id' => 2,
-           );
- 
-           $payload = serialize($data);
-           $status = $this->messageBroker->publishMessage($payload);
-           $count++;
-          }
+        $signup = str_replace('"', '', $signup);
+        $signup = str_replace("\n", '', $signup);
+        $signupData = explode(',', $signup);
+        if ($signupData[1] != '') {
+          $data = array(
+            'activity' => 'campaign_reportback',
+            'email' => $signupData[1],
+            'uid' => $signupData[0],
+            'event_id' => $signupData[2],
+            'activity_timestamp' => $signupData[3],
+            'application_id' => 2,
+          );
+          
+          echo '------- campaign-reportback-import MBI_ProduceCampaignActivity produceFromCSV data: ' . print_r($data) . ' -------', "\n";
 
+          $payload = serialize($data);
+          $status = $this->messageBroker->publishMessage($payload);
+          $count++;
         }
 
       }
@@ -105,8 +103,14 @@ $config = array(
   'routingKey' => 'campaign.drupal.import',
 );
 
-$targetFile = 'campaign-reportback20140528.csv';
+if (isset($argv[1]) && $argv[1] != '') {
+  $targetFile = $argv[1];
 
-// Kick off
-$mbi = new MBI_ProduceCampaignActivity($credentials, $config);
-$mbi->produceFromCSV($targetFile);
+  // Kick off
+  $mbi = new MBI_ProduceCampaignActivity($credentials, $config);
+  $mbi->produceFromCSV($targetFile);
+  
+}
+else {
+  echo('Target file needs to be provided as a parameter (?targetFile=).' . "\n\n");
+}
