@@ -31,59 +31,59 @@ class MBI_ProduceCampaignActivity {
   public function produceFromCSV($targetCSVFile) {
 
     echo '------- campaign-signup-import MBI_ProduceCampaignActivity produceFromCSV START' . date('D M j G:i:s T Y') . ' -------', "\n";
-    
-    
-$bla = FALSE;
-if ($bla) {
-  $bla = TRUE;
-}
-    
+
+    $signupCount = 0;
+
     $targetCSVFile = __DIR__ . '/' . $targetCSVFile;
-    $signups = file($targetCSVFile);
-    $signups = explode("\n", $signups);
-    $count = 0;
+    $file_handle = FALSE;
+    $file_handle = fopen($targetCSVFile, "r");
 
     // Was there a file found
-    if ($signups != FALSE) {
-      foreach ($signups as $signupCount => $signup) {
-        // Skip column titles
-        if ($signupCount > 0) {
-          $signup = str_replace('"', '', $signup);
-          $signup = str_replace("\n", '', $signup);
-          $signupData = explode(',', $signup);
-          $data = array(
-            'activity' => 'campaign_signup',
-            'email' => $signupData[1],
-            'uid' => $signupData[0],
-            'event_id' => $signupData[2],
-            'activity_timestamp' => $signupData[3],
-            'application_id' => 2,
-          );
+    if ($file_handle != FALSE) {
 
-          $payload = serialize($data);
-          $status = $this->messageBroker->publishMessage($payload);
-          $count ++;
+      while (!feof($file_handle)) {
+        $signup = fgets($file_handle);
+        $signup = str_replace('"', '', $signup);
+        $signup = str_replace("\n", '', $signup);
+        $signupData = explode(',', $signup);
+        $data = array(
+          'activity' => 'campaign_signup',
+          'email' => $signupData[1],
+          'uid' => $signupData[0],
+          'event_id' => $signupData[2],
+          'activity_timestamp' => $signupData[3],
+          'application_id' => 2,
+        );
 
-        }
+        $payload = serialize($data);
+        $status = $this->messageBroker->publishMessage($payload);
+        $signupCount++;
 
       }
- 
+      fclose($file_handle);
+
     }
     else {
       trigger_error('Invalid file ' . $targetCSVFile, E_USER_WARNING);
       return FALSE;
     }
 
-    echo $signupCount . 'email addresses imported.', "\n";
-    echo '------- campaign-signup-import MBI_ProduceCampaignActivity produceFromCSV : ' . $count . ' added/updated... - END' . date('D M j G:i:s T Y') . ' -------', "\n";
+    echo '------- campaign-signup-import MBI_ProduceCampaignActivity produceFromCSV : ' . $signupCount . ' added/updated... - END' . date('D M j G:i:s T Y') . ' -------', "\n";
   }
 
 }
 
-// $argv[1] = 'campaign-signup-mnelson-20140627.csv';
 
+// Kick off
+$targetFile = '';
 if (isset($argv[1]) && $argv[1] != '') {
   $targetFile = $argv[1];
+}
+elseif (isset($_GET['targetFile'])) {
+  $targetFile = $_GET['targetFile'];
+}
+
+if ($targetFile != '') {
 
   // Settings
   $credentials = array(
